@@ -58,7 +58,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.25,
 print('ytest counts\n',y_test.value_counts().head())
 print('ytrain counts\n',y_train.value_counts().head())
 
-model = DecisionTreeClassifier(criterion='entropy',max_depth=4) # Choose model
+model = DecisionTreeClassifier(criterion='entropy',max_depth=8) # Choose model
 
 model.fit(X_train,y_train) # Train the model
 
@@ -66,11 +66,11 @@ pred = model.predict(X_test)
 
 err = mean_absolute_error(y_test, pred)
 print('model err', err)
-err = mean_absolute_error(y_test, np.full(245,y_test.mean()))
+err = mean_absolute_error(y_test, np.full(y_test.shape[0],y_test.mean())) #y_test.mean()
 print('baseline err', err)
 
 plt.figure()
-plt.scatter(y_test, pred)
+plt.scatter(y_test, pred+np.random.rand(y_test.shape[0]))
 plt.show()
 
 
@@ -90,3 +90,54 @@ tree.plot_tree(model,feature_names=X_train.columns,class_names=['no_error', 'sma
                filled=True,)#fontsize=10
 plt.show()
 #res = model.predict(X)
+
+print("""
+Second Tree model for deciding the level of the error
+""")
+
+data_error = df[df['error'] == 1]
+
+X = data_error[inputColumns]
+Y = data_error[output]
+
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.25,
+                                                    random_state=42,shuffle=True, stratify=Y)
+#alternative:
+#X_train, X_test, y_train, y_test = train_test_split(data[inputColumns], 
+#                                   data.niceness,test_size=0.25,random_state=42)
+
+print('ytest counts\n',y_test.value_counts().head())
+print('ytrain counts\n',y_train.value_counts().head())
+
+model = DecisionTreeClassifier(criterion='entropy',max_depth=5) # Choose model
+
+model.fit(X_train,y_train) # Train the model
+
+pred = model.predict(X_test)
+
+err = mean_absolute_error(y_test, pred)
+print('model err', err)
+err = mean_absolute_error(y_test, np.full(y_test.shape[0],2)) #y_test.mean()
+print('baseline err', err)
+print('-------------')
+
+plt.figure()
+plt.scatter(y_test, pred+np.random.rand(y_test.shape[0]))
+plt.show()
+
+plt.figure()
+plt.scatter(y_test, np.full(y_test.shape[0],y_test.mean()))
+plt.show()
+
+acc=sum(pred==y_test)/len(y_test)
+print(f'accuracy = {acc}')
+confusion_matrix = pd.crosstab(y_test, pred, rownames=['Actual'], \
+                               colnames=['Predicted'])
+print(confusion_matrix)
+
+fig = plt.figure(figsize=(30,10))
+tree.plot_tree(model,feature_names=X_train.columns,class_names=['no_error', 'small','med','severe'],\
+               filled=True,)#fontsize=10
+plt.show()
+
+print(""" End of Tree model """)
