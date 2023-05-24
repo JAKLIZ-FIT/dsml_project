@@ -13,7 +13,11 @@ nanColumns = ['ionizationclass','FluxCompensation','multideminsionality',
 def loadData(path='../data/manufacturing.csv'):
     return pd.read_csv(path)
 
-def prepareData(df,encoding='basic'):
+"""
+encoding: basic, onehot, none
+if using onehot, define the columns to encode
+"""
+def prepareData(df,encoding='basic',encColumns=[]):
     df.drop("id", axis = 1,inplace=True)
     df = df[df['width'] != 10000000000]
     if encoding == 'basic':
@@ -21,7 +25,11 @@ def prepareData(df,encoding='basic'):
         for column in nanColumns:
             df[column] = le.fit_transform(df[column])
     elif encoding == 'onehot':
-        pass # TODO
+        for column in encColumns: 
+            one_hot = pd.get_dummies(df[column])
+            dfEnc=pd.concat([df,one_hot],axis=1)
+            dfEnc.drop(column,axis=1,inplace=True)
+            df = dfEnc
     else:
         pass
     return df
