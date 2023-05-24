@@ -41,16 +41,15 @@ plt.ylabel("quality")
 plt.title("Scatter plot of data")
 
 # Prepare data for training
-X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.25,
-                                                    random_state=56)
+X_train, X_rest, y_train, y_rest = train_test_split(X, Y, test_size=0.25,
+                                                    random_state=42)
 
-X_val, X_test, y_val, y_test = train_test_split(X_test, y_test, test_size=0.5,
-                                                    random_state=56)
+X_val, X_test, y_val, y_test = train_test_split(X_rest, y_rest, test_size=0.5,
+                                                    random_state=42)
 
 # Create model
 model = Sequential()
-model.add(Dense(128, activation="relu", input_dim=1))
-model.add(Dense(32, activation="relu"))
+model.add(Dense(32, activation="relu", input_dim=1))
 model.add(Dense(8, activation="relu"))
 # Since the regression is performed, a Dense layer containing a single neuron with a linear activation function.
 # Typically ReLu-based activation are used but since it is performed regression, it is needed a linear activation.
@@ -63,11 +62,11 @@ model.compile(loss='mean_squared_error', optimizer=Adam(lr=1e-3, decay=1e-3 / 20
 es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=200)
 
 # Fit the model
-history = model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=10000000, batch_size=100, verbose=2, callbacks=[es])
+history = model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=10000, 
+                    batch_size=100, verbose=2, callbacks=[es])
 
 # Calculate predictions
 y_pred = model.predict(X_test)
-y_val_pred = model.predict(X_val)
 
 ### Evaluation
 from sklearn.metrics import mean_squared_error
