@@ -23,7 +23,7 @@ def prepareData(df,encoding='basic',encColumns=[]):
     if encoding == 'basic':
         le = LabelEncoder()
         for column in nanColumns:
-            df[column] = le.fit_transform(df[column])
+            df.loc[:,column] = le.fit_transform(df.loc[:,column])
     elif encoding == 'onehot':
         for column in encColumns: 
             one_hot = pd.get_dummies(df[column])

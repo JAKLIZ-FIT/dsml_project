@@ -9,14 +9,12 @@ Model for task Q1
 
 from sklearn import metrics
 from xgboost import XGBRegressor
-from xgboost import plot_tree
-from sklearn.tree import DecisionTreeClassifier
-from sklearn import tree
+import xgboost as xgb
 
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from dataPrep import loadData,prepareData
+from dataPrep import loadData,prepareData, normalizeData
 import numpy as np
 import seaborn as sns
 from sklearn.metrics import mean_absolute_error
@@ -43,11 +41,24 @@ output = 'weight_in_kg'
 
 df = df[df['width'] != 10000000000]
 print(df['weight_in_kg'].describe())
-sns.boxplot(df['weight_in_kg'])
+#sns.boxplot(df['weight_in_kg'])
 print(df.describe())
+
+                          
 
 X = df[inputColumns]
 Y = df[output]
+
+from sklearn.preprocessing import normalize
+X = pd.DataFrame(normalize(X,axis=0),columns=X.columns)
+#X = normalizeData(X)
+#from sklearn import preprocessing
+#min_max_scaler = preprocessing.MinMaxScaler()
+#X = pd.DataFrame(min_max_scaler.fit_transform(X),columns=X.columns)
+print(X.describe())
+
+pd.plotting.scatter_matrix(X,figsize=(8,8),grid=True, marker='o')
+
 
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.25,
                                                     random_state=42)
@@ -59,6 +70,8 @@ model = XGBRegressor() # Choose model
 
 model.fit(X_train,y_train) # Train the model
 
+xgb.plot_importance(model)
+
 pred = model.predict(X_test)
 
 err = mean_absolute_error(y_test, pred)
@@ -66,13 +79,28 @@ print('model err', err)
 err = mean_absolute_error(y_test, np.full(245,y_test.mean()))
 print('baseline err', err)
 
-plt.figure()
+plt.figure(figsize=(8,5))
 plt.scatter(y_test, pred)
+plt.xlabel("Weight - Ground truth")
+plt.ylabel("Weight - Prediction")
+plt.title("Prediction vs reality")
 plt.show()
+
+"""for col in inputColumns:
+    plt.figure(figsize=(8,5))
+    plt.scatter(X_test[col], pred)
+    plt.xlabel(col)
+    plt.ylabel("Weight")
+    plt.title(col + " & Weight")
+    plt.show()
+
 
 plt.figure()
 plt.scatter(y_test, np.full(245,y_test.mean()))
 plt.show()
+"""
+
+
 
 #acc=sum(pred==y_test)/len(y_test)
 #print(f'accuracy = {acc}')

@@ -4,7 +4,7 @@ Created on Fri May 12 16:33:13 2023
 
 @author: jiri zilka
 
-Model for task Q1
+Model for task Q2
 """
 
 from sklearn import metrics

@@ -23,30 +23,40 @@ df = prepareData(df)
 
 
 
+
 allColumns = ['id','width','height','ionizationclass','FluxCompensation','pressure',
  'karma','modulation','weight_in_kg','weight_in_g','error','error_type',
  'Quality','reflectionScore','distortion','nicesness','multideminsionality']
 
-inputColumns = ['width','height','ionizationclass','FluxCompensation','pressure',
- 'karma','modulation']
+inputColumns = ['width','height','ionizationclass','FluxCompensation','pressure','karma','modulation']
 output = 'weight_in_kg'
 
-import seaborn as sns
+inCnt = len(inputColumns)
+
+""" exploratory analysis"""
+#import seaborn as sns
 #sns.boxplot(df['width'])
-import numpy as np
-print(np.where(df['width'] == 10000000000))
-df = df[df['width'] != 10000000000]
-df.loc[df['width'] == 10000000000,'width'] = df.width.median()
-sns.boxplot(df['width'])
+#import numpy as np
+#print("locs with high vals:", np.where(df['width'] == 10000000000))
+#df = df[df['width'] != 10000000000]
+#df.loc[df['width'] == 10000000000,'width'] = df.width.median()
+#sns.boxplot(df['width'])
 
 X = df[inputColumns]
 Y = df[[output]]
 
+print(X.describe())
+print(Y.describe())
+
+from sklearn import preprocessing
+min_max_scaler = preprocessing.MinMaxScaler()
+X = min_max_scaler.fit_transform(X)
+
 for c in inputColumns: 
     print(X[c].describe())
 
-from sklearn.preprocessing import normalize
-X = pd.DataFrame(normalize(X,axis=1),columns=X.columns)
+#from sklearn.preprocessing import normalize
+#X = pd.DataFrame(normalize(X,axis=1),columns=X.columns)
 
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.25,
                                                     random_state=42)
@@ -68,19 +78,18 @@ y_train = y_train
 y_test = y_test
 
 model = Sequential()
-model.add(layers.Dense(10, activation='relu', input_shape=(7,)))
-model.add(layers.Dense(20, activation='relu'))
-model.add(layers.Dense(10, activation='relu'))
-model.add(layers.Dense(1, activation='relu'))
+model.add(layers.Dense(32, activation='relu', input_shape=(inCnt,)))
+model.add(layers.Dense(32, activation='relu'))
+model.add(layers.Dense(1, activation='sigmoid'))
 
 model.summary()
 
 model.compile(loss='mean_absolute_error',
-              optimizer=RMSprop(),
+              optimizer='sgd',
               metrics=['accuracy'])
 
-batch_size = 100
-epochs = 50
+batch_size = 32
+epochs = 100
 
 history = model.fit(X_train, y_train,
                     batch_size=batch_size,
