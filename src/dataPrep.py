@@ -39,7 +39,7 @@ def normalizeData(df,n_axis=0):
     
 
 def removeOutliers(df):
-    #TODO
+    df = df[df['width'] != 10000000000]
     pass
 
 # useless, it takes one line anyway
