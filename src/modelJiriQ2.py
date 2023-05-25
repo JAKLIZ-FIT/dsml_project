@@ -99,12 +99,9 @@ Y = data_error[output] - 1
 
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.25,
                                                     random_state=42,shuffle=True, stratify=Y)
-#alternative:
-#X_train, X_test, y_train, y_test = train_test_split(data[inputColumns], 
-#                                   data.niceness,test_size=0.25,random_state=42)
 
-print('ytest counts\n',y_test.value_counts().head())
-print('ytrain counts\n',y_train.value_counts().head())
+#print('ytest counts\n',y_test.value_counts().head())
+#print('ytrain counts\n',y_train.value_counts().head())
 
 model = XGBClassifier() # Choose model
 
