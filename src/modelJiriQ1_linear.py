@@ -41,6 +41,9 @@ model_pol = np.poly1d(np.polyfit(X_train_pol,y_train, deg))
 y_pred = model.predict(X_test)
 y_pred_pol = model_pol(X_test)
 
+X_test_pol_plot = np.linspace(X_test.min(),X_test.max())
+y_pred_pol_plot = model_pol(X_test_pol_plot)
+
 mae = mean_absolute_error(y_test, y_pred)
 print('Mean Absolute Error:', mae)
 
@@ -51,10 +54,20 @@ mae_pol = mean_absolute_error(y_test, y_pred_pol)
 print('Mean Absolute Error for poly:', mae_pol)
 
 plt.figure(figsize=(8,5))
-plt.scatter(X_test, y_test)
+plt.scatter(X_test, y_test,label='ground truth')
+plt.plot(X_test, y_pred, label='linear model',c='orange')
 plt.xlabel("width")
 plt.ylabel("weight_in_kg")
+plt.legend()
 plt.title("Scatter plot of testing data")
+
+plt.figure(figsize=(8,5))
+plt.scatter(X_test, y_test,label='ground truth')
+plt.plot(X_test_pol_plot, y_pred_pol_plot, label='poly model',c='orange')
+plt.xlabel("width")
+plt.ylabel("weight_in_kg")
+plt.legend()
+plt.title("Testing data and model")
 
 plt.figure(figsize=(8,5))
 plt.scatter(X_test, y_pred)

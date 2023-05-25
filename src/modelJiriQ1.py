@@ -21,15 +21,13 @@ from sklearn.metrics import mean_absolute_error
 
 df = loadData()
 #print(df.dtypes)
-#print("ionization classes:",df.ionizationclass.unique())
-#print("Flux Compensation:", df.FluxCompensation.unique())
+
 df = prepareData(df)
-
 #print(df.dtypes)
-
-#print(np.where(df['width'] == 10000000000))
-#df.loc[df['width'] == 10000000000,'width'] = df.width.median()
 #sns.boxplot(df['width'])
+#sns.boxplot(df['weight_in_kg'])
+#print(df['weight_in_kg'].describe())
+#print(df.describe())
 
 allColumns = ['id','width','height','ionizationclass','FluxCompensation','pressure',
  'karma','modulation','weight_in_kg','weight_in_g','error','error_type',
@@ -39,45 +37,34 @@ inputColumns = ['width','height','ionizationclass','FluxCompensation','pressure'
  'karma','modulation']
 output = 'weight_in_kg'
 
-df = df[df['width'] != 10000000000]
-print(df['weight_in_kg'].describe())
-#sns.boxplot(df['weight_in_kg'])
-print(df.describe())
-
-                          
+usedColumns = inputColumns.append(output)
 
 X = df[inputColumns]
 Y = df[output]
+U = df[['width','height','ionizationclass','FluxCompensation','pressure',
+ 'karma','modulation','reflectionScore']]
 
 from sklearn.preprocessing import normalize
 X = pd.DataFrame(normalize(X,axis=0),columns=X.columns)
-#X = normalizeData(X)
-#from sklearn import preprocessing
-#min_max_scaler = preprocessing.MinMaxScaler()
-#X = pd.DataFrame(min_max_scaler.fit_transform(X),columns=X.columns)
-print(X.describe())
+#print(X.describe())
 
-pd.plotting.scatter_matrix(X,figsize=(8,8),grid=True, marker='o')
-
+pd.plotting.scatter_matrix(U,figsize=(8,8),grid=True, marker='o')
 
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.25,
                                                     random_state=42)
-#alternative:
-#X_train, X_test, y_train, y_test = train_test_split(data[inputColumns], 
-#                                   data.niceness,test_size=0.25,random_state=42)
 
 model = XGBRegressor() # Choose model
 
 model.fit(X_train,y_train) # Train the model
 
-xgb.plot_importance(model)
+xgb.plot_importance(model) # show feature importance
 
-pred = model.predict(X_test)
+pred = model.predict(X_test) # make a prediction
 
 err = mean_absolute_error(y_test, pred)
-print('model err', err)
+print('XGB model error:', err)
 err = mean_absolute_error(y_test, np.full(245,y_test.mean()))
-print('baseline err', err)
+print('Baseline error: ', err)
 
 plt.figure(figsize=(8,5))
 plt.scatter(y_test, pred)
@@ -86,31 +73,9 @@ plt.ylabel("Weight - Prediction")
 plt.title("Prediction vs reality")
 plt.show()
 
-"""for col in inputColumns:
-    plt.figure(figsize=(8,5))
-    plt.scatter(X_test[col], pred)
-    plt.xlabel(col)
-    plt.ylabel("Weight")
-    plt.title(col + " & Weight")
-    plt.show()
-
-
+"""
+# plot baseline
 plt.figure()
 plt.scatter(y_test, np.full(245,y_test.mean()))
 plt.show()
 """
-
-
-
-#acc=sum(pred==y_test)/len(y_test)
-#print(f'accuracy = {acc}')
-#confusion_matrix = pd.crosstab(y_test, pred, rownames=['Actual'], \
-#                               colnames=['Predicted'])
-
-#print(confusion_matrix)
-
-#fig = plt.figure(figsize=(30,10))
-#tree.plot_tree(model,feature_names=X_train.columns,class_names=['no_churn', 'churn'],\
-#               filled=True,)#fontsize=10
-#plt.show()
-#res = model.predict(X)
